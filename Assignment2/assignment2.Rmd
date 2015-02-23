@@ -6,9 +6,41 @@ output: html_document
 ---
 ### loading the data into work space
 ```{r,cache=TRUE}
+library(plyr)
+library(ggplot2)
 workwd <- "/Users/sun/Documents/Work_place/R/learning/Exploratory_data_analysis"
 setwd(paste(workwd,"/Assignment2/",sep=""))
-NEI <- readRDS("summarySCC_PM25.rds")
-SCC <- readRDS("Source_Classification_Code.rds")
+NEI <- readRDS("exdata-data-NEI_data/summarySCC_PM25.rds")
+SCC <- readRDS("exdata-data-NEI_data/Source_Classification_Code.rds")
 ```
 
+## Questions
+1. Have total emissions from PM2.5 decreased in the United States from 1999 to 2008? Using the base plotting system, make a plot showing the total PM2.5 emission from all sources for each of the years 1999, 2002, 2005, and 2008.
+```{r}
+NEI$year = factor(NEI$year)
+# sum the emissions for each year
+PM25sum <- ddply(NEI, "year",summarise,sum=sum(Emissions,na.rm=T))
+# make the plot
+barplot(t(PM25sum$sum),names.arg = PM25sum$year,xlab="year",ylab="total emission",main="Total emission of PM2.5")
+dev.copy(png,"plot1.png")
+dev.off()
+```
+
+
+2.Have total emissions from PM2.5 decreased in the Baltimore City, Maryland (fips == "24510") from 1999 to 2008? Use the base plotting system to make a plot answering this question.
+```{r}
+NEI.baltimore <- subset(NEI,subset = NEI$fips=="24510")
+PM25.baltimore <- ddply(NEI.baltimore, "year",summarise,sum=sum(Emissions,na.rm=T))
+barplot(t(PM25.baltimore$sum),names.arg = PM25.baltimore$year,xlab="year",ylab="total emission",main="Total emission of PM2.5 in Baltimore")
+dev.copy(png,"plot2.png")
+dev.off()
+```
+
+
+3. Of the four types of sources indicated by the type (point, nonpoint, onroad, nonroad) variable, which of these four sources have seen decreases in emissions from 1999–2008 for Baltimore City? Which have seen increases in emissions from 1999–2008? Use the ggplot2 plotting system to make a plot answer this question.
+
+Across the United States, how have emissions from coal combustion-related sources changed from 1999–2008?
+
+How have emissions from motor vehicle sources changed from 1999–2008 in Baltimore City?
+
+Compare emissions from motor vehicle sources in Baltimore City with emissions from motor vehicle sources in Los Angeles County, California (fips == "06037"). Which city has seen greater changes over time in motor vehicle emissions?
